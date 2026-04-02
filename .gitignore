@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# PyInstaller
+desktop-tk/build/
+desktop-tk/dist/
+
+# VS Code extension
+vscode-extension/node_modules/
+vscode-extension/out/
+*.vsix
+
+# Native Qt build
+native-qt/build*/
+**/CMakeCache.txt
+**/CMakeFiles/
+
+# OS / IDE
+.vs/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
+
