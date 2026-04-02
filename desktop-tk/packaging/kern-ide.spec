@@ -1,7 +1,5 @@
-# PyInstaller spec for the Tk-based Kern IDE.
-#
-# Goal: produce a single standalone `dist/kern-ide.exe` with no `_internal` folder.
-# Build (Windows):
+# PyInstaller spec for Kern IDE (tkinter).
+# Run via build\build_ecosystem.ps1 or:
 #   cd kern-ide && python -m PyInstaller --noconfirm packaging/kern-ide.spec
 
 import os
@@ -9,11 +7,11 @@ import os
 block_cipher = None
 spec_dir = os.path.dirname(os.path.abspath(SPEC))
 ide_root = os.path.normpath(os.path.join(spec_dir, ".."))
+repo_root = os.path.normpath(os.path.join(ide_root, ".."))
 
 a = Analysis(
     [os.path.join(ide_root, "main.py")],
-    # Only include the IDE root; do not pull in the sibling repo.
-    pathex=[ide_root],
+    pathex=[ide_root, repo_root],
     binaries=[],
     datas=[],
     hiddenimports=[

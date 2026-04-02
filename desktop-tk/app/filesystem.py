@@ -10,8 +10,6 @@ class FileExplorer:
         self.root_path = root_path
         self._node_to_path: dict[str, Path] = {}
         self._loaded_dirs: set[str] = set()
-
-        # Placeholder child inserted under directories so Treeview shows the expand arrow.
         self._placeholder_text = "..."
 
     def set_root(self, root_path: Path) -> None:
@@ -25,12 +23,10 @@ class FileExplorer:
         self.tree.delete(*self.tree.get_children(""))
         self._node_to_path.clear()
         self._loaded_dirs.clear()
-
         root = self.tree.insert("", "end", text=self.root_path.name, open=True)
         self._node_to_path[root] = self.root_path
         self._loaded_dirs.add(root)
-
-        # Load only the first level eagerly; deeper levels are lazy-loaded on expand.
+        # Eager-load only the first level; subdirectories are lazy-loaded on expand.
         self._load_children(root, self.root_path)
 
     def _load_children(self, parent_node: str, path: Path) -> None:
@@ -44,28 +40,24 @@ class FileExplorer:
             node = self.tree.insert(parent_node, "end", text=item.name, open=False)
             self._node_to_path[node] = item
             if item.is_dir():
-                # Insert a placeholder so the directory is expandable.
+                # Insert a placeholder so the directory can be expanded.
                 self.tree.insert(node, "end", text=self._placeholder_text, open=False)
 
     def on_tree_open(self, _event: object = None) -> None:
         """
-        Lazy-load directory children on expansion.
+        Lazy-load directory children on expansion (`<<TreeviewOpen>>`).
 
-        Tk's `<<TreeviewOpen>>` fires when a node changes from closed→open. We only load the
-        immediate children for that directory and replace the placeholder child.
+        We load only immediate children and replace the placeholder child.
         """
-        # TreeviewOpen doesn't provide a direct node id in the event; focus/selection is enough.
         node_id = self.tree.focus() or (self.tree.selection()[0] if self.tree.selection() else "")
-        if not node_id:
-            return
-        if node_id in self._loaded_dirs:
+        if not node_id or node_id in self._loaded_dirs:
             return
 
         path = self.path_for_node(node_id)
         if not path or not path.is_dir():
             return
 
-        # Remove placeholder children before repopulating.
+        # Remove placeholders before re-populating.
         for child in list(self.tree.get_children(node_id)):
             if self.tree.item(child, "text") == self._placeholder_text:
                 self.tree.delete(child)
